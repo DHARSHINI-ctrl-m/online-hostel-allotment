@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hostel Allotment - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h3 class="text-center mb-4">Hostel Allotment</h3>
+                        <ul class="nav nav-tabs mb-3" id="authTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Login</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab">Register</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="login" role="tabpanel">
+                                <form id="loginForm" class="vstack gap-3">
+                                    <div>
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="loginEmail" required />
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="loginPassword" required />
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Role</label>
+                                        <select id="loginRole" class="form-select">
+                                            <option value="student">Student</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-primary w-100" type="submit">Login</button>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="register" role="tabpanel">
+                                <form id="registerForm" class="vstack gap-3">
+                                    <div>
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="regName" required />
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="regEmail" required />
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="regPassword" required />
+                                    </div>
+                                    <button class="btn btn-success w-100" type="submit">Create Account</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="authAlert" class="alert mt-3 d-none" role="alert"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/app.js"></script>
+    <script>
+        const api = window.HostelAPI;
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const authAlert = document.getElementById('authAlert');
+
+        function showAlert(type, message) {
+            authAlert.className = `alert alert-${type}`;
+            authAlert.textContent = message;
+            authAlert.classList.remove('d-none');
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const role = document.getElementById('loginRole').value;
+            try {
+                const res = await api.login(email, password, role);
+                if (res.success) {
+                    showAlert('success', 'Login successful. Redirecting...');
+                    setTimeout(() => {
+                        if (res.user.role === 'admin') {
+                            location.href = 'admin.html';
+                        } else {
+                            location.href = 'dashboard.html';
+                        }
+                    }, 600);
+                } else {
+                    showAlert('danger', res.message || 'Login failed');
+                }
+            } catch (err) {
+                showAlert('danger', 'Unable to login. Is the backend running?');
+            }
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            try {
+                const res = await api.register(name, email, password);
+                if (res.success) {
+                    showAlert('success', 'Account created. Please login.');
+                    document.getElementById('login-tab').click();
+                } else {
+                    showAlert('danger', res.message || 'Registration failed');
+                }
+            } catch (err) {
+                showAlert('danger', 'Unable to register. Is the backend running?');
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
